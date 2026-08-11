@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://yashhacks.com/sitemap.xml
