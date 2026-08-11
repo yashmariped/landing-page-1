@@ -30,10 +30,22 @@
     'security-plus.cred': 'CompTIA Security+ ce\nIssued Sep 2024 · Expires Sep 2027'
   });
 
+  const certSummary = Object.values(certFiles).join('\n\n');
   const commands = Object.freeze(['help','ls','pwd','whoami','experience','skills','projects','certs','education','recommendations','learning','contact','cat','cd','clear','linkedin','github','email']);
   const allowedExternal = Object.freeze({
     linkedin: 'https://www.linkedin.com/in/yashmaripeddi/',
     github: 'https://github.com/yashmariped'
+  });
+  const friendlyFiles = Object.freeze({
+    about: 'about.txt',
+    whoami: 'about.txt',
+    experience: 'experience.txt',
+    skills: 'skills.txt',
+    projects: 'projects.txt',
+    education: 'education.txt',
+    recommendations: 'recommendations.txt',
+    learning: 'learning.txt',
+    contact: 'contact.txt'
   });
 
   function print(text, className = '') {
@@ -58,11 +70,11 @@
     const normalized = rawInput.slice(0, MAX_COMMAND_LENGTH).trim();
     const parts = normalized.split(/\s+/u);
     const cmd = (parts.shift() || '').toLowerCase();
-    const arg = parts[0] || '';
+    const arg = (parts[0] || '').toLowerCase();
     if (!cmd) return;
 
     if (cmd === 'clear') { output.replaceChildren(); return; }
-    if (cmd === 'help') { print('COMMANDS\n  ls                    list files\n  cat <file>            read a local portfolio file\n  cd certs | cd ~       change virtual directory\n  pwd                   show virtual path\n  whoami                about me\n  experience            work history\n  skills                security focus\n  projects              public projects\n  certs                 certifications\n  education             academic background\n  recommendations       colleague recommendations\n  learning              current learning\n  contact               contact details\n  linkedin | github     open trusted profile\n  email                 compose email\n  clear                 clear terminal\n\nTip: ↑/↓ for history, Tab for completion. This is a local portfolio shell—not a system shell.'); return; }
+    if (cmd === 'help') { print('COMMANDS\n  ls                    list files\n  cat <file>            read a local portfolio file\n  cat certs             show certifications\n  cd certs | cd ~       change virtual directory\n  pwd                   show virtual path\n  whoami                about me\n  experience            work history\n  skills                security focus\n  projects              public projects\n  certs                 certifications\n  education             academic background\n  recommendations       colleague recommendations\n  learning              current learning\n  contact               contact details\n  linkedin | github     open trusted profile\n  email                 compose email\n  clear                 clear terminal\n\nTip: ↑/↓ for history, Tab for completion. This is a local portfolio shell—not a system shell.'); return; }
     if (cmd === 'pwd') { print(cwd === '~' ? '/home/yash' : `/home/yash/${cwd}`); return; }
     if (cmd === 'ls') { print(cwd === 'certs' ? Object.keys(certFiles).join('  ') : `${Object.keys(files).join('  ')}  certs/`); return; }
     if (cmd === 'cd') {
@@ -73,17 +85,16 @@
       setPrompt(); return;
     }
     if (cmd === 'cat') {
+      if (cwd === '~' && arg === 'certs') { print(certSummary); return; }
       const source = cwd === 'certs' ? certFiles : files;
-      if (Object.prototype.hasOwnProperty.call(source, arg)) print(source[arg]);
+      const resolved = cwd === '~' && Object.prototype.hasOwnProperty.call(friendlyFiles, arg) ? friendlyFiles[arg] : arg;
+      if (Object.prototype.hasOwnProperty.call(source, resolved)) print(source[resolved]);
       else print(`cat: ${arg || '(missing file)'}: No such file`, 'muted');
       return;
     }
 
-    const aliases = Object.freeze({
-      whoami: 'about.txt', experience: 'experience.txt', skills: 'skills.txt', projects: 'projects.txt', education: 'education.txt', recommendations: 'recommendations.txt', learning: 'learning.txt', contact: 'contact.txt'
-    });
-    if (Object.prototype.hasOwnProperty.call(aliases, cmd)) { print(files[aliases[cmd]]); return; }
-    if (cmd === 'certs') { print(Object.values(certFiles).join('\n\n')); return; }
+    if (Object.prototype.hasOwnProperty.call(friendlyFiles, cmd)) { print(files[friendlyFiles[cmd]]); return; }
+    if (cmd === 'certs') { print(certSummary); return; }
     if (Object.prototype.hasOwnProperty.call(allowedExternal, cmd)) { openTrusted(allowedExternal[cmd]); print(`Opening ${cmd}…`); return; }
     if (cmd === 'email') { window.location.assign('mailto:yashwanthreddyeh@gmail.com'); return; }
     print(`command not found: ${cmd}. Type 'help'.`, 'muted');
@@ -114,7 +125,7 @@
       const value = input.value.trim();
       if (value.startsWith('cat ')) {
         const query = value.slice(4);
-        const names = cwd === 'certs' ? Object.keys(certFiles) : Object.keys(files);
+        const names = cwd === 'certs' ? Object.keys(certFiles) : [...Object.keys(files), 'certs'];
         const match = names.find((name) => name.startsWith(query));
         if (match) input.value = `cat ${match}`;
       } else {
