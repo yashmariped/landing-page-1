@@ -1,0 +1,5 @@
+Contact: mailto:yashwanthreddyeh@gmail.com
+Canonical: https://yashhacks.com/.well-known/security.txt
+Preferred-Languages: en
+Policy: https://yashhacks.com/#contact
+Expires: 2027-08-10T23:59:59Z
